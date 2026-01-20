@@ -1,0 +1,44 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
+
+export async function GET() {
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { author: { select: { name: true, email: true } } },
+  });
+  return NextResponse.json(posts);
+}
+
+export async function POST(req: Request) {
+  const token = cookies().get("token")?.value;
+  if (!token) return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+
+  let payload: any;
+  try {
+    payload = verifyToken(token);
+  } catch {
+    return NextResponse.json({ error: "Token inválido." }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const { title, anime, content, coverUrl, tags } = body;
+
+  if (!title || !anime || !content) {
+    return NextResponse.json({ error: "title, anime e content são obrigatórios." }, { status: 400 });
+  }
+
+  const post = await prisma.post.create({
+    data: {
+      title,
+      anime,
+      content,
+      coverUrl: coverUrl || null,
+      tags: tags || null,
+      authorId: payload.userId,
+    },
+  });
+
+  return NextResponse.json(post);
+}
