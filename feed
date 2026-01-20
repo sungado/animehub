@@ -1,0 +1,67 @@
+export const dynamic = "force-dynamic";
+
+async function getPosts() {
+  const res = await fetch("http://localhost:3000/api/posts", { cache: "no-store" });
+  return res.json();
+}
+
+export default async function Home() {
+  const posts = await getPosts();
+
+  return (
+    <main className="min-h-screen">
+      <header className="sticky top-0 z-10 backdrop-blur bg-zinc-950/70 border-b border-zinc-800">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-orange-500/20 border border-orange-500/30 grid place-items-center">
+              🍥
+            </div>
+            <div>
+              <p className="font-semibold leading-none">AnimeHub</p>
+              <p className="text-xs text-zinc-400">Posts de animes em geral</p>
+            </div>
+          </div>
+
+          <nav className="flex items-center gap-2">
+            <a className="px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm hover:bg-zinc-800"
+               href="/login">Login</a>
+            <a className="px-3 py-2 rounded-xl bg-orange-500 text-sm text-zinc-950 font-semibold hover:opacity-90"
+               href="/admin">Criar post</a>
+          </nav>
+        </div>
+      </header>
+
+      <section className="max-w-5xl mx-auto px-4 py-6 grid gap-4 sm:grid-cols-2">
+        {posts?.length ? posts.map((p: any) => (
+          <article key={p.id} className="rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/40">
+            {p.coverUrl ? (
+              <img src={p.coverUrl} alt="" className="w-full h-44 object-cover" />
+            ) : (
+              <div className="w-full h-44 bg-gradient-to-br from-orange-500/20 to-zinc-950" />
+            )}
+
+            <div className="p-4 grid gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-semibold text-lg line-clamp-1">{p.title}</h2>
+                <span className="text-xs px-2 py-1 rounded-full bg-zinc-800 text-zinc-300">
+                  {p.anime}
+                </span>
+              </div>
+
+              <p className="text-sm text-zinc-300 line-clamp-3">{p.content}</p>
+
+              <div className="flex items-center justify-between text-xs text-zinc-400 pt-2">
+                <span>por {p.author?.name || p.author?.email}</span>
+                <span>{new Date(p.createdAt).toLocaleDateString("pt-BR")}</span>
+              </div>
+            </div>
+          </article>
+        )) : (
+          <div className="text-zinc-400">
+            Ainda não tem posts. Faz login e cria o primeiro 👇
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
