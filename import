@@ -1,0 +1,4 @@
+npx create-next-app@latest animehub --ts --app --tailwind
+cd animehub
+npm i prisma @prisma/client bcryptjs jsonwebtoken
+npx prisma init --datasource-provider sqlite
